@@ -1,28 +1,47 @@
-import { v4 as cloudinary } from 'cloudinary';
+import cloudinaryModule from 'cloudinary';
 import fs from 'fs';
 
-// Configuration
+const cloudinary = cloudinaryModule.v2;
+
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 const uploadOnCloudinary = async (localFilePath) => {
-    try {
-        if (!localFilePath) return null;
-
-        // Upload the file to Cloudinary
-        const response = await cloudinary.uploader.upload(localFilePath, { resource_type: 'auto' })
-
-        //File upload successful, delete the local file
-        console.log(`File uploaded to Cloudinary: ${response.url}`);
-        return response;
-        
-    } catch (error) {
-        fs.unlinkSync(localFilePath); // Delete the local file if upload fails
-        return null;
+  try {
+    if (!localFilePath) {
+      // console.log("❌ localFilePath is empty");
+      return null;
     }
+
+    // console.log("📤 Uploading to Cloudinary from:", localFilePath);
+
+    const response = await cloudinary.uploader.upload(localFilePath, {
+      resource_type: 'auto',
+    });
+
+    // console.log("✅ Cloudinary upload response:", response);
+
+  // Intentionally remove the local file after upload
+    if (fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath);
+    }
+    // console.log("RESPONSE", response);
+    
+    return response;
+
+  } catch (error) {
+    console.error("❌ Cloudinary Upload Error:", error);
+
+    if (fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath);
+    }
+
+    return null;
+  }
 };
+
 
 export { uploadOnCloudinary };
