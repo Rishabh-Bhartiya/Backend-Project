@@ -164,7 +164,7 @@ const logoutUser = asyncHandler(async (req, res) => {
         .status(200)
         .clearCookie("accessToken", options)
         .clearCookie("refreshToken", options)
-        .json(new ApiResponse(200, {}, "User Logged Out Successfully"))
+        .json(new ApiResponse(200, {}, `${req.user.username} Logged Out Successfully`))
 })
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
@@ -380,6 +380,9 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     if(!channel?.length) {
         throw new ApiError(404, "Channel does not Exists")
     }
+
+    console.log("Channel", channel);
+    
 
     return res
         .status(200)
